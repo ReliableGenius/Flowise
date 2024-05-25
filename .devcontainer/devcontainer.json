@@ -1,0 +1,11 @@
+{
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:18-bookworm",
+    "forwardPorts": [
+        3000,
+        8080
+    ],
+    "runArgs": [
+        "--network=host"
+    ],
+    "postStartCommand": "pnpm config set store-dir /home/node/.local/share/pnpm/store"
+}
