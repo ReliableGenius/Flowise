@@ -1,14 +1,14 @@
-import { ICommonObject, IDatabaseEntity, INode, INodeData, INodeOptionsValue, INodeParams, IUsedTool } from '../../../src/Interface'
+import { flatten, isEqual, uniqWith } from 'lodash'
+import fetch from 'node-fetch'
 import OpenAI from 'openai'
 import { DataSource } from 'typeorm'
-import { getCredentialData, getCredentialParam } from '../../../src/utils'
-import fetch from 'node-fetch'
-import { flatten, uniqWith, isEqual } from 'lodash'
 import { zodToJsonSchema } from 'zod-to-json-schema'
 import { AnalyticHandler } from '../../../src/handler'
+import { ICommonObject, IDatabaseEntity, INode, INodeData, INodeOptionsValue, INodeParams, IUsedTool } from '../../../src/Interface'
+import { addSingleFileToStorage } from '../../../src/storageUtils'
+import { getCredentialData, getCredentialParam } from '../../../src/utils'
 import { Moderation, checkInputs, streamResponse } from '../../moderation/Moderation'
 import { formatResponse } from '../../outputparsers/OutputParserHelpers'
-import { addSingleFileToStorage } from '../../../src/storageUtils'
 
 const lenticularBracketRegex = /【[^】]*】/g
 const imageRegex = /<img[^>]*\/>/g
@@ -70,6 +70,26 @@ class OpenAIAssistant_Agents implements INode {
                 type: 'boolean',
                 description: 'Whether to enable parallel function calling during tool use. Defaults to true',
                 default: true,
+                optional: true,
+                additionalParams: true
+            },
+            {
+                label: 'Override Instructions',
+                name: 'overrideInstructions',
+                description:
+                    'Override the assistant instructions. This is useful when you want to provide a different set of instructions for the assistant to follow',
+                type: 'string',
+                rows: 4,
+                optional: true,
+                additionalParams: true
+            },
+            {
+                label: 'Override Addtional Instructions',
+                name: 'overrideAdditionalInstructions',
+                description:
+                    'Override the assistant additional instructions. This is useful when you want to provide a different set of additional instructions for the assistant to follow',
+                type: 'string',
+                rows: 4,
                 optional: true,
                 additionalParams: true
             },
@@ -172,6 +192,8 @@ class OpenAIAssistant_Agents implements INode {
         const selectedAssistantId = nodeData.inputs?.selectedAssistant as string
         const appDataSource = options.appDataSource as DataSource
         const databaseEntities = options.databaseEntities as IDatabaseEntity
+        const overrideInstructions = nodeData.inputs?.overrideInstructions as string
+        const overrideAdditionalInstructions = nodeData.inputs?.overrideAdditionalInstructions as string
         const disableFileDownload = nodeData.inputs?.disableFileDownload as boolean
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
         const _toolChoice = nodeData.inputs?.toolChoice as string
@@ -310,9 +332,7 @@ class OpenAIAssistant_Agents implements INode {
             if (isStreaming) {
                 const streamThread = await openai.beta.threads.runs.create(threadId, {
                     assistant_id: retrievedAssistant.id,
-                    stream: true,
-                    tool_choice: toolChoice,
-                    parallel_tool_calls: parallelToolCalls
+                    stream: true
                 })
 
                 for await (const event of streamThread) {
@@ -635,9 +655,7 @@ class OpenAIAssistant_Agents implements INode {
 
             // Polling run status
             const runThread = await openai.beta.threads.runs.create(threadId, {
-                assistant_id: retrievedAssistant.id,
-                tool_choice: toolChoice,
-                parallel_tool_calls: parallelToolCalls
+                assistant_id: retrievedAssistant.id
             })
             runThreadId = runThread.id
             let state = await promise(threadId, runThread.id)
@@ -650,9 +668,7 @@ class OpenAIAssistant_Agents implements INode {
                 if (retries > 0) {
                     retries -= 1
                     const newRunThread = await openai.beta.threads.runs.create(threadId, {
-                        assistant_id: retrievedAssistant.id,
-                        tool_choice: toolChoice,
-                        parallel_tool_calls: parallelToolCalls
+                        assistant_id: retrievedAssistant.id
                     })
                     runThreadId = newRunThread.id
                     state = await promise(threadId, newRunThread.id)
