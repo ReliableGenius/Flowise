@@ -373,7 +373,9 @@ class OpenAIAssistant_Agents implements INode {
             if (shouldStreamResponse) {
                 const streamThread = await openai.beta.threads.runs.create(threadId, {
                     assistant_id: retrievedAssistant.id,
-                    stream: true
+                    stream: true,
+                    instructions: overrideInstructions || undefined,
+                    additional_instructions: overrideAdditionalInstructions || undefined
                 })
 
                 for await (const event of streamThread) {
@@ -741,7 +743,9 @@ class OpenAIAssistant_Agents implements INode {
 
             // Polling run status
             const runThread = await openai.beta.threads.runs.create(threadId, {
-                assistant_id: retrievedAssistant.id
+                assistant_id: retrievedAssistant.id,
+                instructions: overrideInstructions ?? assistantDetails.instructions,
+                additional_instructions: overrideAdditionalInstructions ?? assistantDetails.additional_instructions
             })
             runThreadId = runThread.id
             let state = await promise(threadId, runThread.id)
@@ -754,7 +758,9 @@ class OpenAIAssistant_Agents implements INode {
                 if (retries > 0) {
                     retries -= 1
                     const newRunThread = await openai.beta.threads.runs.create(threadId, {
-                        assistant_id: retrievedAssistant.id
+                        assistant_id: retrievedAssistant.id,
+                        instructions: overrideInstructions ?? assistantDetails.instructions,
+                        additional_instructions: overrideAdditionalInstructions ?? assistantDetails.additional_instructions
                     })
                     runThreadId = newRunThread.id
                     state = await promise(threadId, newRunThread.id)
