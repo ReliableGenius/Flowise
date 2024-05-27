@@ -214,6 +214,7 @@ class OpenAIAssistant_Agents implements INode {
         const overrideInstructions = nodeData.inputs?.overrideInstructions as string
         const overrideAdditionalInstructions = nodeData.inputs?.overrideAdditionalInstructions as string
         const disableFileDownload = nodeData.inputs?.disableFileDownload as boolean
+        const overrideSessionId = nodeData.inputs?.sessionId as string
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
         const _toolChoice = nodeData.inputs?.toolChoice as string
         const parallelToolCalls = nodeData.inputs?.parallelToolCalls as boolean
@@ -285,7 +286,7 @@ class OpenAIAssistant_Agents implements INode {
                 chatflowid: options.chatflowid
             })
 
-            let threadId = options.overrideConfig.sessionId
+            let threadId = overrideSessionId
             let isNewThread = false
             if (!chatmessage && !threadId) {
                 const thread = await openai.beta.threads.create({})
