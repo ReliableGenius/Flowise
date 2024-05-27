@@ -112,6 +112,14 @@ class OpenAIAssistant_Agents implements INode {
                     'Messages can contain text, images, or files. In some cases, you may want to prevent others from downloading the files. Learn more from OpenAI File Annotation <a target="_blank" href="https://platform.openai.com/docs/assistants/how-it-works/managing-threads-and-messages">docs</a>',
                 optional: true,
                 additionalParams: true
+            },
+            {
+                label: 'Session ID',
+                name: 'sessionId',
+                type: 'string',
+                description: 'Unique identifier for the session, must be the openAI thread ID that begins with `thread_123...`',
+                optional: true,
+                additionalParams: true
             }
         ]
     }
@@ -277,14 +285,14 @@ class OpenAIAssistant_Agents implements INode {
                 chatflowid: options.chatflowid
             })
 
-            let threadId = ''
+            let threadId = options.overrideConfig.sessionId
             let isNewThread = false
-            if (!chatmessage) {
+            if (!chatmessage && !threadId) {
                 const thread = await openai.beta.threads.create({})
                 threadId = thread.id
                 isNewThread = true
             } else {
-                const thread = await openai.beta.threads.retrieve(chatmessage.sessionId)
+                const thread = await openai.beta.threads.retrieve(chatmessage?.sessionId || threadId)
                 threadId = thread.id
             }
 
