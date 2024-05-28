@@ -83,6 +83,14 @@ class OpenAIAssistant_Agents implements INode {
                 additionalParams: true
             },
             {
+                label: 'Override Model',
+                name: 'overrideModel',
+                description: 'Override the assistant model',
+                type: 'string',
+                optional: true,
+                additionalParams: true
+            },
+            {
                 label: 'Override Instructions',
                 name: 'overrideInstructions',
                 description:
@@ -209,6 +217,7 @@ class OpenAIAssistant_Agents implements INode {
         const selectedAssistantId = nodeData.inputs?.selectedAssistant as string
         const appDataSource = options.appDataSource as DataSource
         const databaseEntities = options.databaseEntities as IDatabaseEntity
+        const overrideModel = nodeData.inputs?.overrideModel as string
         const overrideInstructions = nodeData.inputs?.overrideInstructions as string
         const overrideAdditionalInstructions = nodeData.inputs?.overrideAdditionalInstructions as string
         const disableFileDownload = nodeData.inputs?.disableFileDownload as boolean
@@ -381,6 +390,7 @@ class OpenAIAssistant_Agents implements INode {
                 const streamThread = await openai.beta.threads.runs.create(threadId, {
                     assistant_id: retrievedAssistant.id,
                     stream: true,
+                    model: overrideModel || undefined,
                     instructions: overrideInstructions || undefined,
                     additional_instructions: overrideAdditionalInstructions || undefined
                 })
@@ -760,8 +770,8 @@ class OpenAIAssistant_Agents implements INode {
             // Polling run status
             const runThread = await openai.beta.threads.runs.create(threadId, {
                 assistant_id: retrievedAssistant.id,
-                instructions: overrideInstructions ?? assistantDetails.instructions,
-                additional_instructions: overrideAdditionalInstructions ?? assistantDetails.additional_instructions
+                instructions: overrideInstructions || undefined,
+                additional_instructions: overrideAdditionalInstructions || undefined
             })
             runThreadId = runThread.id
             let state = await promise(threadId, runThread.id)
@@ -775,8 +785,8 @@ class OpenAIAssistant_Agents implements INode {
                     retries -= 1
                     const newRunThread = await openai.beta.threads.runs.create(threadId, {
                         assistant_id: retrievedAssistant.id,
-                        instructions: overrideInstructions ?? assistantDetails.instructions,
-                        additional_instructions: overrideAdditionalInstructions ?? assistantDetails.additional_instructions
+                        instructions: overrideInstructions || undefined,
+                        additional_instructions: overrideAdditionalInstructions || undefined
                     })
                     runThreadId = newRunThread.id
                     state = await promise(threadId, newRunThread.id)
