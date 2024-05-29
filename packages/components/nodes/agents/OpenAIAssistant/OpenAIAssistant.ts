@@ -21,6 +21,16 @@ import { formatResponse } from '../../outputparsers/OutputParserHelpers'
 
 const lenticularBracketRegex = /【[^】]*】/g
 const imageRegex = /<img[^>]*\/>/g
+type OpenAIRunStatus =
+    | 'queued'
+    | 'in_progress'
+    | 'requires_action'
+    | 'cancelling'
+    | 'cancelled'
+    | 'failed'
+    | 'completed'
+    | 'incomplete'
+    | 'expired'
 
 class OpenAIAssistant_Agents implements INode {
     label: string
@@ -326,7 +336,8 @@ class OpenAIAssistant_Agents implements INode {
                                             runStatus === 'completed' ||
                                             runStatus === 'expired' ||
                                             runStatus === 'failed' ||
-                                            runStatus === 'requires_action')
+                                            runStatus === 'requires_action' ||
+                                            runStatus === 'incomplete')
                                     ) {
                                         clearInterval(timeout)
                                         resolve()
