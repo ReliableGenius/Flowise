@@ -12,6 +12,16 @@ import { formatResponse } from '../../outputparsers/OutputParserHelpers'
 
 const lenticularBracketRegex = /【[^】]*】/g
 const imageRegex = /<img[^>]*\/>/g
+type OpenAIRunStatus =
+    | 'queued'
+    | 'in_progress'
+    | 'requires_action'
+    | 'cancelling'
+    | 'cancelled'
+    | 'failed'
+    | 'completed'
+    | 'incomplete'
+    | 'expired'
 
 class OpenAIAssistant_Agents implements INode {
     label: string
@@ -299,14 +309,15 @@ class OpenAIAssistant_Agents implements INode {
                             const allRuns = await openai.beta.threads.runs.list(threadId)
                             if (allRuns.data && allRuns.data.length) {
                                 const firstRunId = allRuns.data[0].id
-                                const runStatus = allRuns.data.find((run) => run.id === firstRunId)?.status
+                                const runStatus = allRuns.data.find((run) => run.id === firstRunId)?.status as OpenAIRunStatus
                                 if (
                                     runStatus &&
                                     (runStatus === 'cancelled' ||
                                         runStatus === 'completed' ||
                                         runStatus === 'expired' ||
                                         runStatus === 'failed' ||
-                                        runStatus === 'requires_action')
+                                        runStatus === 'requires_action' ||
+                                        runStatus === 'incomplete')
                                 ) {
                                     clearInterval(timeout)
                                     resolve()
@@ -585,16 +596,6 @@ class OpenAIAssistant_Agents implements INode {
                 return new Promise((resolve, reject) => {
                     const timeout = setInterval(async () => {
                         const run = await openai.beta.threads.runs.retrieve(threadId, runId)
-                        type OpenAIRunStatus =
-                            | 'queued'
-                            | 'in_progress'
-                            | 'requires_action'
-                            | 'cancelling'
-                            | 'cancelled'
-                            | 'failed'
-                            | 'completed'
-                            | 'incomplete'
-                            | 'expired'
                         const state = run.status as OpenAIRunStatus
                         if (state === 'completed') {
                             clearInterval(timeout)
