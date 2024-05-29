@@ -619,7 +619,17 @@ class OpenAIAssistant_Agents implements INode {
                 return new Promise((resolve, reject) => {
                     const timeout = setInterval(async () => {
                         const run = await openai.beta.threads.runs.retrieve(threadId, runId)
-                        const state = run.status
+                        type OpenAIRunStatus =
+                            | 'queued'
+                            | 'in_progress'
+                            | 'requires_action'
+                            | 'cancelling'
+                            | 'cancelled'
+                            | 'failed'
+                            | 'completed'
+                            | 'incomplete'
+                            | 'expired'
+                        const state = run.status as OpenAIRunStatus
                         if (state === 'completed') {
                             clearInterval(timeout)
                             resolve(state)
@@ -700,7 +710,7 @@ class OpenAIAssistant_Agents implements INode {
                                     reject(new Error(`Error submitting tool outputs: ${state}, Thread ID: ${threadId}, Run ID: ${runId}`))
                                 }
                             }
-                        } else if (state === 'cancelled' || state === 'expired' || state === 'failed') {
+                        } else if (state === 'cancelled' || state === 'expired' || state === 'failed' || state === 'incomplete') {
                             clearInterval(timeout)
                             reject(
                                 new Error(`Error processing thread: ${state}, Thread ID: ${threadId}, Run ID: ${runId}, Status: ${state}`)
