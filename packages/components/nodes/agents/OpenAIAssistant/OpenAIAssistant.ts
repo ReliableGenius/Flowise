@@ -795,7 +795,7 @@ class OpenAIAssistant_Agents implements INode {
                     runThreadId = newRunThread.id
                     state = await promise(threadId, newRunThread.id)
                 } else {
-                    const errMsg = `Error processing thread: ${state}, Thread ID: ${threadId}`
+                    const errMsg = `Error processing thread: ${state}, Thread ID: ${threadId}, Run ID: ${runThreadId}`
                     await analyticHandlers.onChainError(parentIds, errMsg)
                     throw new Error(errMsg)
                 }
