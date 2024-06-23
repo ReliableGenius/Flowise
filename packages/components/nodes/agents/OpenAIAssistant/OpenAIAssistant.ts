@@ -667,6 +667,7 @@ class OpenAIAssistant_Agents implements INode {
                                         })
                                         resolve(state)
                                     } else {
+                                        console.error('Error submitting tool outputs:', submitToolOutputs, newStatus)
                                         await openai.beta.threads.runs.cancel(threadId, runId)
                                         resolve('requires_action_retry')
                                     }
