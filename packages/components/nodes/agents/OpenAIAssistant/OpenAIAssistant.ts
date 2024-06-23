@@ -703,6 +703,7 @@ class OpenAIAssistant_Agents implements INode {
                                         })
                                         resolve(state)
                                     } else {
+                                        console.error('Actions', actions)
                                         console.error('Error submitting tool outputs:', submitToolOutputs, newStatus)
                                         await openai.beta.threads.runs.cancel(threadId, runId)
                                         resolve('requires_action_retry')
@@ -718,7 +719,7 @@ class OpenAIAssistant_Agents implements INode {
                                 new Error(`Error processing thread: ${state}, Thread ID: ${threadId}, Run ID: ${runId}, Status: ${state}`)
                             )
                         }
-                    }, 500)
+                    }, 1000)
                 })
             }
 
