@@ -682,7 +682,7 @@ class OpenAIAssistant_Agents implements INode {
                                     })
                                     const submitToolOutputs = []
                                     for (let i = 0; i < actions.length; i += 1) {
-                                        const tool = tools.find((tool: any) => tool.name === actions[i].tool)
+                                    const tool = tools.find((tool: any) => tool.name?.replace('-', '_') === actions[i].tool)
                                         if (!tool) continue
 
                                         // Start tool analytics
