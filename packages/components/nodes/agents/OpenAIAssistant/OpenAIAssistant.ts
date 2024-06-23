@@ -720,7 +720,7 @@ class OpenAIAssistant_Agents implements INode {
                                 new Error(`Error processing thread: ${state}, Thread ID: ${threadId}, Run ID: ${runId}, Status: ${state}`)
                             )
                         }
-                    }, 1000)
+                    }, 500)
                 })
             }
 
