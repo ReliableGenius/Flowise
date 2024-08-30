@@ -95,6 +95,14 @@ class OpenAIAssistant_Agents implements INode {
                 additionalParams: true
             },
             {
+                label: 'Override Assistant Id',
+                name: 'overrideAssistantId',
+                description: 'Override the Open AI assistant id',
+                type: 'string',
+                optional: true,
+                additionalParams: true
+            },
+            {
                 label: 'Override Model',
                 name: 'overrideModel',
                 description: 'Override the assistant model',
@@ -229,6 +237,7 @@ class OpenAIAssistant_Agents implements INode {
         const selectedAssistantId = nodeData.inputs?.selectedAssistant as string
         const appDataSource = options.appDataSource as DataSource
         const databaseEntities = options.databaseEntities as IDatabaseEntity
+        const ovverideAssistantId = nodeData.inputs?.overrideAssistantId as string
         const overrideModel = nodeData.inputs?.overrideModel as string
         const overrideInstructions = nodeData.inputs?.overrideInstructions as string
         const overrideAdditionalInstructions = nodeData.inputs?.overrideAdditionalInstructions as string
@@ -281,7 +290,7 @@ class OpenAIAssistant_Agents implements INode {
 
         try {
             const assistantDetails = JSON.parse(assistant.details)
-            const openAIAssistantId = assistantDetails.id
+            const openAIAssistantId = !ovverideAssistantId ? assistantDetails.id : ovverideAssistantId
 
             // Retrieve assistant
             const retrievedAssistant = await openai.beta.assistants.retrieve(openAIAssistantId)
