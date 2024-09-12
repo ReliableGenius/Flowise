@@ -321,7 +321,7 @@ class OpenAIAssistant_Agents implements INode {
                 threadId = thread.id
                 isNewThread = true
             } else {
-                const thread = await openai.beta.threads.retrieve(chatmessage?.sessionId || threadId)
+                const thread = await openai.beta.threads.retrieve(threadId || chatmessage?.sessionId)
                 threadId = thread.id
             }
 
