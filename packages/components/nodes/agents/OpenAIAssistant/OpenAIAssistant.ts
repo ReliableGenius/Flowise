@@ -657,7 +657,7 @@ class OpenAIAssistant_Agents implements INode {
 
             const promise = (threadId: string, runId: string) => {
                 return new Promise((resolve, reject) => {
-                    const maxWaitTime = 30000 // Maximum wait time of 30 seconds
+                    const maxWaitTime = 60000 // Maximum wait time of 60 seconds
                     const startTime = Date.now()
                     let delay = 500 // Initial delay between retries
                     const maxRetries = 10
@@ -690,12 +690,12 @@ class OpenAIAssistant_Agents implements INode {
                                         })
                                     })
 
-                                const submitToolOutputs = []
-                                for (let i = 0; i < actions.length; i += 1) {
-                                    const tool = tools.find(
-                                        (tool: any) => tool.name?.replace('-', '_') === actions[i].tool?.replace('-', '_')
-                                    )
-                                    if (!tool) continue
+                                    const submitToolOutputs = []
+                                    for (let i = 0; i < actions.length; i += 1) {
+                                        const tool = tools.find(
+                                            (tool: any) => tool.name?.replace('-', '_') === actions[i].tool?.replace('-', '_')
+                                        )
+                                        if (!tool) continue
 
                                         // Start tool analytics
                                         const toolIds = await analyticHandlers.onToolStart(tool.name, actions[i].toolInput, parentIds)
@@ -742,7 +742,8 @@ class OpenAIAssistant_Agents implements INode {
                                             })
                                             resolve(state)
                                         } else {
-                                            await openai.beta.threads.runs.cancel(threadId, runId)
+                                            // Don't cancel the thread if the tool outputs are not submitted
+                                            // await openai.beta.threads.runs.cancel(threadId, runId)
                                             resolve('requires_action_retry')
                                         }
                                     } catch (e) {
