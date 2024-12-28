@@ -234,15 +234,21 @@ class OpenAIAssistant_Agents implements INode {
     }
 
     async run(nodeData: INodeData, input: string, options: ICommonObject): Promise<string | object> {
+        console.log('Running OpenAI Assistant')
+        console.log('Node Data:', nodeData)
+        console.log('Options:', options)
+        console.log('Input:', input)
         const selectedAssistantId = nodeData.inputs?.selectedAssistant as string
         const appDataSource = options.appDataSource as DataSource
         const databaseEntities = options.databaseEntities as IDatabaseEntity
         const overrideAssistantId = nodeData.inputs?.overrideAssistantId as string
+        console.log('override Assistant:', overrideAssistantId)
         const overrideModel = nodeData.inputs?.overrideModel as string
         const overrideInstructions = nodeData.inputs?.overrideInstructions as string
         const overrideAdditionalInstructions = nodeData.inputs?.overrideAdditionalInstructions as string
         const disableFileDownload = nodeData.inputs?.disableFileDownload as boolean
         const overrideSessionId = nodeData.inputs?.sessionId as string
+        console.log('override Session:', overrideSessionId)
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
         const _toolChoice = nodeData.inputs?.toolChoice as string
         const parallelToolCalls = nodeData.inputs?.parallelToolCalls as boolean
