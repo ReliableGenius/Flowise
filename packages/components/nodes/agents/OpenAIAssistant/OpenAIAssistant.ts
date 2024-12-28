@@ -235,9 +235,7 @@ class OpenAIAssistant_Agents implements INode {
 
     async run(nodeData: INodeData, input: string, options: ICommonObject): Promise<string | object> {
         console.log('Running OpenAI Assistant')
-        console.log('Node Data:', nodeData)
-        console.log('Options:', options)
-        console.log('Input:', input)
+        console.log('Node Data:', nodeData.inputs)
         const selectedAssistantId = nodeData.inputs?.selectedAssistant as string
         const appDataSource = options.appDataSource as DataSource
         const databaseEntities = options.databaseEntities as IDatabaseEntity
@@ -335,6 +333,12 @@ class OpenAIAssistant_Agents implements INode {
 
             console.log('Thread ID:', threadId)
 
+            // Add message to thread
+            await openai.beta.threads.messages.create(threadId, {
+                role: 'user',
+                content: input
+            })
+
             // List all runs, in case existing thread is still running
             if (!isNewThread) {
                 const promise = (threadId: string) => {
@@ -365,7 +369,8 @@ class OpenAIAssistant_Agents implements INode {
                                     }
                                 } else {
                                     clearInterval(timeout)
-                                    reject(new Error(`Empty Thread: ${threadId}`))
+                                    resolve() // resolve if no runs are found
+                                    // reject(new Error(`Empty Thread: ${threadId}`))
                                 }
                             } catch (error: any) {
                                 if (error.response?.status === 404) {
@@ -391,12 +396,6 @@ class OpenAIAssistant_Agents implements INode {
                 }
                 await promise(threadId)
             }
-
-            // Add message to thread
-            await openai.beta.threads.messages.create(threadId, {
-                role: 'user',
-                content: input
-            })
 
             // Run assistant thread
             const llmIds = await analyticHandlers.onLLMStart('ChatOpenAI', input, parentIds)
