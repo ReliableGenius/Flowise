@@ -237,7 +237,7 @@ class OpenAIAssistant_Agents implements INode {
         const selectedAssistantId = nodeData.inputs?.selectedAssistant as string
         const appDataSource = options.appDataSource as DataSource
         const databaseEntities = options.databaseEntities as IDatabaseEntity
-        const ovverideAssistantId = nodeData.inputs?.overrideAssistantId as string
+        const overrideAssistantId = nodeData.inputs?.overrideAssistantId as string
         const overrideModel = nodeData.inputs?.overrideModel as string
         const overrideInstructions = nodeData.inputs?.overrideInstructions as string
         const overrideAdditionalInstructions = nodeData.inputs?.overrideAdditionalInstructions as string
@@ -290,7 +290,9 @@ class OpenAIAssistant_Agents implements INode {
 
         try {
             const assistantDetails = JSON.parse(assistant.details)
-            const openAIAssistantId = !ovverideAssistantId ? assistantDetails.id : ovverideAssistantId
+            const openAIAssistantId = !overrideAssistantId ? assistantDetails.id : overrideAssistantId
+
+            console.log('Assistant ID:', openAIAssistantId)
 
             // Retrieve assistant
             const retrievedAssistant = await openai.beta.assistants.retrieve(openAIAssistantId)
@@ -324,6 +326,8 @@ class OpenAIAssistant_Agents implements INode {
                 const thread = await openai.beta.threads.retrieve(threadId || chatmessage?.sessionId)
                 threadId = thread.id
             }
+
+            console.log('Thread ID:', threadId)
 
             // List all runs, in case existing thread is still running
             if (!isNewThread) {
@@ -412,9 +416,9 @@ class OpenAIAssistant_Agents implements INode {
                 const streamThread = await openai.beta.threads.runs.create(threadId, {
                     assistant_id: retrievedAssistant.id,
                     stream: true,
-                    model: overrideModel || undefined,
-                    instructions: overrideInstructions || undefined,
-                    additional_instructions: overrideAdditionalInstructions || undefined
+                    model: overrideModel,
+                    instructions: overrideInstructions,
+                    additional_instructions: overrideAdditionalInstructions
                 })
 
                 for await (const event of streamThread) {
