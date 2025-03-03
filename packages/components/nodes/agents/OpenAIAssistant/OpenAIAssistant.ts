@@ -928,7 +928,7 @@ class OpenAIAssistant_Agents implements INode {
             }
         } catch (error) {
             await analyticHandlers.onChainError(parentIds, error, true)
-            throw new Error(error)
+            throw error
         }
     }
 }
