@@ -419,6 +419,8 @@ class OpenAIAssistant_Agents implements INode {
                 }
             }
 
+            console.log('shouldStreamResponse', shouldStreamResponse)
+
             if (shouldStreamResponse) {
                 const streamThread = await openai.beta.threads.runs.create(threadId, {
                     assistant_id: retrievedAssistant.id,
@@ -795,6 +797,7 @@ class OpenAIAssistant_Agents implements INode {
                 })
             }
 
+            console.log('polling run status')
             // Polling run status
             const runThread = await openai.beta.threads.runs.create(threadId, {
                 assistant_id: retrievedAssistant.id,
@@ -811,6 +814,7 @@ class OpenAIAssistant_Agents implements INode {
             while (state === 'requires_action_retry') {
                 if (retries > 0) {
                     retries -= 1
+                    console.log('retrying requires_action')
                     const newRunThread = await openai.beta.threads.runs.create(threadId, {
                         assistant_id: retrievedAssistant.id,
                         instructions: overrideInstructions,
@@ -820,7 +824,7 @@ class OpenAIAssistant_Agents implements INode {
                     state = await promise(threadId, newRunThread.id)
                 } else {
                     const errMsg = `Error processing thread: ${state}, Thread ID: ${threadId}, Run ID: ${runThreadId}`
-                    // await analyticHandlers.onChainError(parentIds, errMsg)
+                    await analyticHandlers.onChainError(parentIds, errMsg)
                     throw new Error(errMsg)
                 }
             }
