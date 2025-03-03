@@ -753,10 +753,9 @@ class OpenAIAssistant_Agents implements INode {
                                             await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
                                                 tool_outputs: submitToolOutputs
                                             })
-                                            resolve(state)
+                                            resolve(newStatus)
                                         } else {
-                                            // Don't cancel the thread if the tool outputs are not submitted
-                                            // await openai.beta.threads.runs.cancel(threadId, runId)
+                                            await openai.beta.threads.runs.cancel(threadId, runId)
                                             resolve('requires_action_retry')
                                         }
                                     } catch (e) {
@@ -814,17 +813,17 @@ class OpenAIAssistant_Agents implements INode {
             while (state === 'requires_action_retry') {
                 if (retries > 0) {
                     retries -= 1
-                    console.log('retrying requires_action')
-                    // const newRunThread = await openai.beta.threads.runs.create(threadId, {
-                    //     assistant_id: retrievedAssistant.id,
-                    //     instructions: overrideInstructions,
-                    //     additional_instructions: overrideAdditionalInstructions
-                    // })
-                    // runThreadId = newRunThread.id
-                    // state = await promise(threadId, newRunThread.id)
-                    state = await promise(threadId, runThread.id)
+                    console.log('retrying requires_action', retries)
+                    const newRunThread = await openai.beta.threads.runs.create(threadId, {
+                        assistant_id: retrievedAssistant.id,
+                        instructions: overrideInstructions,
+                        additional_instructions: overrideAdditionalInstructions
+                    })
+                    runThreadId = newRunThread.id
+                    state = await promise(threadId, newRunThread.id)
+                    // state = await promise(threadId, runThread.id)
                 } else {
-                    const errMsg = `Error processing thread: ${state}, Thread ID: ${threadId}, Run ID: ${runThreadId}`
+                    const errMsg = `Error processing requires_action_retry thread: ${state}, Thread ID: ${threadId}, Run ID: ${runThreadId}`
                     await analyticHandlers.onChainError(parentIds, errMsg)
                     throw new Error(errMsg)
                 }
