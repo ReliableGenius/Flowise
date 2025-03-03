@@ -343,6 +343,7 @@ class OpenAIAssistant_Agents implements INode {
                                 if (allRuns.data && allRuns.data.length) {
                                     const firstRunId = allRuns.data[0].id
                                     const runStatus = allRuns.data.find((run) => run.id === firstRunId)?.status
+                                    console.log('runStatus', runStatus)
                                     if (
                                         runStatus &&
                                         (runStatus === 'cancelled' ||
