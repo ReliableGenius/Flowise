@@ -326,6 +326,7 @@ class OpenAIAssistant_Agents implements INode {
             }
 
             // Add message to thread
+            console.log('add message to thread', threadId, input)
             await openai.beta.threads.messages.create(threadId, {
                 role: 'user',
                 content: input
