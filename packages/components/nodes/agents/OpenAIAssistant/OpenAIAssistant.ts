@@ -18,7 +18,6 @@ import { addSingleFileToStorage } from '../../../src/storageUtils'
 import { getCredentialData, getCredentialParam } from '../../../src/utils'
 import { Moderation, checkInputs, streamResponse } from '../../moderation/Moderation'
 import { formatResponse } from '../../outputparsers/OutputParserHelpers'
-import { addSingleFileToStorage } from '../../../src/storageUtils'
 import { DynamicStructuredTool } from '../../tools/OpenAPIToolkit/core'
 
 const lenticularBracketRegex = /【[^】]*】/g
