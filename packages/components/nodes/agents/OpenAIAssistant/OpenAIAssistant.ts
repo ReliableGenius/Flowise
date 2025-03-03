@@ -671,7 +671,7 @@ class OpenAIAssistant_Agents implements INode {
 
             const promise = (threadId: string, runId: string) => {
                 return new Promise((resolve, reject) => {
-                    const maxWaitTime = 60000 // Maximum wait time of 60 seconds
+                    const maxWaitTime = 120000 // Maximum wait time of 120 seconds
                     const startTime = Date.now()
                     let delay = 500 // Initial delay between retries
                     const maxRetries = 10
@@ -751,6 +751,7 @@ class OpenAIAssistant_Agents implements INode {
 
                                     try {
                                         if (submitToolOutputs.length && newStatus === 'requires_action') {
+                                            console.log('submitting tool outputs', threadId, runId, submitToolOutputs)
                                             await openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
                                                 tool_outputs: submitToolOutputs
                                             })
@@ -766,7 +767,7 @@ class OpenAIAssistant_Agents implements INode {
                                         )
                                     }
                                 }
-                            } else if (state === 'cancelled' || state === 'expired' || state === 'failed') {
+                            } else if (state === 'cancelled' || state === 'expired' || state === 'failed' || state === 'incomplete') {
                                 clearInterval(timeout)
                                 reject(
                                     new Error(
