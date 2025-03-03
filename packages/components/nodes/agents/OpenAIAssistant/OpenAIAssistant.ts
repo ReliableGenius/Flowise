@@ -331,7 +331,7 @@ class OpenAIAssistant_Agents implements INode {
             if (!isNewThread) {
                 const promise = (threadId: string) => {
                     return new Promise<void>((resolve, reject) => {
-                        const maxWaitTime = 30000 // Maximum wait time of 30 seconds
+                        const maxWaitTime = 60000 // Maximum wait time of 60 seconds
                         const startTime = Date.now()
                         let delay = 500 // Initial delay between retries
                         const maxRetries = 10
@@ -749,6 +749,8 @@ class OpenAIAssistant_Agents implements INode {
                                     const newRun = await openai.beta.threads.runs.retrieve(threadId, runId)
                                     const newStatus = newRun?.status
 
+                                    console.log('newStatus', newStatus)
+
                                     try {
                                         if (submitToolOutputs.length && newStatus === 'requires_action') {
                                             console.log('submitting tool outputs', threadId, runId, submitToolOutputs)
@@ -757,8 +759,9 @@ class OpenAIAssistant_Agents implements INode {
                                             })
                                             resolve(newStatus)
                                         } else {
-                                            await openai.beta.threads.runs.cancel(threadId, runId)
-                                            resolve('requires_action_retry')
+                                            resolve(newStatus)
+                                            // await openai.beta.threads.runs.cancel(threadId, runId)
+                                            // resolve('requires_action_retry')
                                         }
                                     } catch (e) {
                                         clearInterval(timeout)
