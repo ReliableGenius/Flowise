@@ -235,18 +235,15 @@ class OpenAIAssistant_Agents implements INode {
 
     async run(nodeData: INodeData, input: string, options: ICommonObject): Promise<string | object> {
         console.log('Running OpenAI Assistant')
-        console.log('Node Data:', nodeData.inputs)
         const selectedAssistantId = nodeData.inputs?.selectedAssistant as string
         const appDataSource = options.appDataSource as DataSource
         const databaseEntities = options.databaseEntities as IDatabaseEntity
         const overrideAssistantId = nodeData.inputs?.overrideAssistantId as string
-        console.log('override Assistant:', overrideAssistantId)
         const overrideModel = nodeData.inputs?.overrideModel as string
         const overrideInstructions = nodeData.inputs?.overrideInstructions as string
         const overrideAdditionalInstructions = nodeData.inputs?.overrideAdditionalInstructions as string
         const disableFileDownload = nodeData.inputs?.disableFileDownload as boolean
         const overrideSessionId = nodeData.inputs?.sessionId as string
-        console.log('override Session:', overrideSessionId)
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
         const _toolChoice = nodeData.inputs?.toolChoice as string
         const parallelToolCalls = nodeData.inputs?.parallelToolCalls as boolean
@@ -296,8 +293,6 @@ class OpenAIAssistant_Agents implements INode {
             const assistantDetails = JSON.parse(assistant.details)
             const openAIAssistantId = !overrideAssistantId ? assistantDetails.id : overrideAssistantId
 
-            console.log('Assistant ID:', openAIAssistantId)
-
             // Retrieve assistant
             const retrievedAssistant = await openai.beta.assistants.retrieve(openAIAssistantId)
 
@@ -330,8 +325,6 @@ class OpenAIAssistant_Agents implements INode {
                 const thread = await openai.beta.threads.retrieve(threadId || chatmessage?.sessionId)
                 threadId = thread.id
             }
-
-            console.log('Thread ID:', threadId)
 
             // Add message to thread
             await openai.beta.threads.messages.create(threadId, {
@@ -796,8 +789,8 @@ class OpenAIAssistant_Agents implements INode {
             // Polling run status
             const runThread = await openai.beta.threads.runs.create(threadId, {
                 assistant_id: retrievedAssistant.id,
-                instructions: overrideInstructions || undefined,
-                additional_instructions: overrideAdditionalInstructions || undefined
+                instructions: overrideInstructions,
+                additional_instructions: overrideAdditionalInstructions
             })
             runThreadId = runThread.id
             let state = await promise(threadId, runThread.id)
@@ -811,8 +804,8 @@ class OpenAIAssistant_Agents implements INode {
                     retries -= 1
                     const newRunThread = await openai.beta.threads.runs.create(threadId, {
                         assistant_id: retrievedAssistant.id,
-                        instructions: overrideInstructions || undefined,
-                        additional_instructions: overrideAdditionalInstructions || undefined
+                        instructions: overrideInstructions,
+                        additional_instructions: overrideAdditionalInstructions
                     })
                     runThreadId = newRunThread.id
                     state = await promise(threadId, newRunThread.id)
