@@ -815,13 +815,14 @@ class OpenAIAssistant_Agents implements INode {
                 if (retries > 0) {
                     retries -= 1
                     console.log('retrying requires_action')
-                    const newRunThread = await openai.beta.threads.runs.create(threadId, {
-                        assistant_id: retrievedAssistant.id,
-                        instructions: overrideInstructions,
-                        additional_instructions: overrideAdditionalInstructions
-                    })
-                    runThreadId = newRunThread.id
-                    state = await promise(threadId, newRunThread.id)
+                    // const newRunThread = await openai.beta.threads.runs.create(threadId, {
+                    //     assistant_id: retrievedAssistant.id,
+                    //     instructions: overrideInstructions,
+                    //     additional_instructions: overrideAdditionalInstructions
+                    // })
+                    // runThreadId = newRunThread.id
+                    // state = await promise(threadId, newRunThread.id)
+                    state = await promise(threadId, runThread.id)
                 } else {
                     const errMsg = `Error processing thread: ${state}, Thread ID: ${threadId}, Run ID: ${runThreadId}`
                     await analyticHandlers.onChainError(parentIds, errMsg)
