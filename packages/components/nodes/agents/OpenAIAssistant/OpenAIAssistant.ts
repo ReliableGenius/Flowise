@@ -318,19 +318,14 @@ class OpenAIAssistant_Agents implements INode {
             let isNewThread = false
             if (!chatmessage && !threadId) {
                 const thread = await openai.beta.threads.create({})
+                console.log('create thread', thread)
                 threadId = thread.id
                 isNewThread = true
             } else {
                 const thread = await openai.beta.threads.retrieve(threadId || chatmessage?.sessionId)
+                console.log('retrieve thread', thread)
                 threadId = thread.id
             }
-
-            // Add message to thread
-            console.log('add message to thread', threadId, input)
-            await openai.beta.threads.messages.create(threadId, {
-                role: 'user',
-                content: input
-            })
 
             // List all runs, in case existing thread is still running
             if (!isNewThread) {
@@ -392,6 +387,20 @@ class OpenAIAssistant_Agents implements INode {
 
             // Run assistant thread
             const llmIds = await analyticHandlers.onLLMStart('ChatOpenAI', input, parentIds)
+
+            try {
+                // Add message to thread
+                console.log('add message to thread', threadId, input)
+                await openai.beta.threads.messages.create(threadId, {
+                    role: 'user',
+                    content: input
+                })
+            } catch (e) {
+                console.error('Error adding message to thread:', e)
+
+                const errMsg = `Error adding message to thread: ${threadId}.`
+                await analyticHandlers.onLLMError(llmIds, errMsg)
+            }
 
             let text = ''
             let runThreadId = ''
