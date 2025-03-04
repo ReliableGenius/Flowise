@@ -759,6 +759,7 @@ class OpenAIAssistant_Agents implements INode {
                                             })
                                             resolve(newStatus)
                                         } else {
+                                            console.log('resolving new status', newStatus)
                                             resolve(newStatus)
                                             // await openai.beta.threads.runs.cancel(threadId, runId)
                                             // resolve('requires_action_retry')
