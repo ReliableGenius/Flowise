@@ -350,7 +350,7 @@ class OpenAIAssistant_Agents implements INode {
                                             runStatus === 'completed' ||
                                             runStatus === 'expired' ||
                                             runStatus === 'failed' ||
-                                            runStatus === 'requires_action' ||
+                                            // runStatus === 'requires_action' ||
                                             runStatus === 'incomplete')
                                     ) {
                                         clearInterval(timeout)
