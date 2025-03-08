@@ -47,7 +47,7 @@ class OpenAIAssistant_Agents implements INode {
     constructor() {
         this.label = 'OpenAI Assistant'
         this.name = 'openAIAssistant'
-        this.version = 4.0
+        this.version = 5.0
         this.type = 'OpenAIAssistant'
         this.category = 'Agents'
         this.icon = 'assistant.svg'
