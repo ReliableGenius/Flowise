@@ -130,6 +130,14 @@ class OpenAIAssistant_Agents implements INode {
                 additionalParams: true
             },
             {
+                label: 'Override Callback Url',
+                name: 'overrideCallbackUrl',
+                description: 'Override the assistant callback url',
+                type: 'string',
+                optional: true,
+                additionalParams: true
+            },
+            {
                 label: 'Disable File Download',
                 name: 'disableFileDownload',
                 type: 'boolean',
@@ -241,6 +249,7 @@ class OpenAIAssistant_Agents implements INode {
         const overrideModel = nodeData.inputs?.overrideModel as string
         const overrideInstructions = nodeData.inputs?.overrideInstructions as string
         const overrideAdditionalInstructions = nodeData.inputs?.overrideAdditionalInstructions as string
+        const overrideCallbackUrl = nodeData.inputs?.overrideCallbackUrl as string
         const disableFileDownload = nodeData.inputs?.disableFileDownload as boolean
         const overrideSessionId = nodeData.inputs?.sessionId as string
         const moderations = nodeData.inputs?.inputModeration as Moderation[]
@@ -920,13 +929,33 @@ class OpenAIAssistant_Agents implements INode {
             await analyticHandlers.onLLMEnd(llmIds, llmOutput)
             await analyticHandlers.onChainEnd(parentIds, messageData, true)
 
-            return {
+            const response = {
                 text: returnVal,
                 usedTools,
                 artifacts,
                 fileAnnotations,
+                vars: nodeData?.inputs?.vars,
                 assistant: { assistantId: openAIAssistantId, threadId, runId: runThreadId, messages: messageData }
             }
+
+            if (overrideCallbackUrl) {
+                try {
+                    const callbackResponse = await fetch(overrideCallbackUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(response)
+                    })
+                    if (!callbackResponse.ok) {
+                        console.error('Error posting to callback URL:', callbackResponse.statusText)
+                    }
+                } catch (error) {
+                    console.error('Error posting to callback URL:', error)
+                }
+            }
+
+            return response
         } catch (error) {
             await analyticHandlers.onChainError(parentIds, error, true)
             throw error
