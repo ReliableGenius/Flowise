@@ -591,6 +591,7 @@ class OpenAIAssistant_Agents implements INode {
                                 })
                             })
                             const submitToolOutputs = []
+                            console.log('actions', actions)
                             for (let i = 0; i < actions.length; i += 1) {
                                 const tool = tools.find((tool: any) => tool.name === actions[i].tool)
                                 if (!tool) continue
@@ -599,11 +600,13 @@ class OpenAIAssistant_Agents implements INode {
                                 const toolIds = await analyticHandlers.onToolStart(tool.name, actions[i].toolInput, parentIds)
 
                                 try {
+                                    console.log('calling tool', actions[i].tool, actions[i].toolInput)
                                     const toolOutput = await tool.call(actions[i].toolInput, undefined, undefined, {
                                         sessionId: threadId,
                                         chatId: options.chatId,
                                         input
                                     })
+                                    console.log('toolOutput', toolOutput)
                                     await analyticHandlers.onToolEnd(toolIds, toolOutput)
                                     submitToolOutputs.push({
                                         tool_call_id: actions[i].toolCallId,
